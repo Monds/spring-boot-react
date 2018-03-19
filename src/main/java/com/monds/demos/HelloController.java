@@ -34,4 +34,7 @@ public class HelloController {
     public Page getTaxonomyCategories(Pageable p) {
         return taxonomyRepository.findAll(p);
     }
+
+
+
 }
