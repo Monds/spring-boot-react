@@ -15,24 +15,19 @@ public class HelloController {
     @Autowired
     private TaxonomyRepository taxonomyRepository;
 
-//    @GetMapping("/api/user/{id}")
-//    public User findUserById(@PathVariable String id) {
-//        return userRepository.findOne(id);
-//    }
-//
-//    @GetMapping("/api/user")
-//    public List<User> getUsers() {
-//        return userRepository.findAll();
-//    }
-
     @GetMapping("/api/taxonomy/category/{code}")
     public TaxonomyCategory findTaxonomyCategoryByCode(@PathVariable String code) {
         return taxonomyRepository.findOne(code);
     }
 
-    @GetMapping("/api/taxonomy/category")
-    public Page getTaxonomyCategories(Pageable p) {
-        return taxonomyRepository.findAll(p);
+//    @GetMapping("/api/taxonomy/category")
+//    public Page getTaxonomyCategories(Pageable p) {
+//        return taxonomyRepository.findAll(p);
+//    }
+
+    @PostMapping("/api/taxonomy/category")
+    public void addTaxonomyCategory(@RequestBody TaxonomyCategory taxonomyCategory) {
+        System.out.println("************" + taxonomyCategory.getName() + "************");
     }
 
 

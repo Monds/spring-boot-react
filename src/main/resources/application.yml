@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:h2:./data/sample
+    url: jdbc:h2:./data/sample;AUTO_SERVER=TRUE
     username: sa
     password:
     driver-class-name: org.h2.Driver
@@ -12,8 +12,8 @@ spring:
       enabled: true
 logging:
   level:
-    ROOT: DEBUG
-security:
-  oauth2:
-    resource:
-      filter-order: 3
+    ROOT: debug
+#security:
+#  oauth2:
+#    resource:
+#      filter-order: 3

@@ -22,15 +22,11 @@ public class OAuth2AuthorizationServerConfiguration extends AuthorizationServerC
     @Autowired
     private AuthenticationManager authenticationManager;
 
-    @Autowired
-    private AppUserDetailsService userDetailsService;
-
     @Override
     public void configure(AuthorizationServerEndpointsConfigurer endpoints) {
         endpoints.tokenStore(tokenStore())
                 .accessTokenConverter(accessTokenConverter())
-                .authenticationManager(authenticationManager)
-                .userDetailsService(userDetailsService);
+                .authenticationManager(authenticationManager);
     }
 
     @Override
@@ -38,7 +34,7 @@ public class OAuth2AuthorizationServerConfiguration extends AuthorizationServerC
         clients.inMemory()
                 .withClient("admin")
                 .secret("foo")
-                .authorizedGrantTypes("password")
+                .authorizedGrantTypes("password") // password 는 매우 insecure 하기 때문에 정말 truly trust 한 application 에서만 사용한다.
                 .authorities("ROLE_USER")
                 .scopes("read", "write")
                 .resourceIds("testjwtresourceid")

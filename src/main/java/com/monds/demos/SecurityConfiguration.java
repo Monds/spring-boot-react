@@ -1,9 +1,11 @@
 package com.monds.demos;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -12,6 +14,7 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
+import javax.sql.DataSource;
 import java.util.Arrays;
 
 @Configuration
@@ -27,15 +30,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 //    @Value("${security.security-realm}")
 //    private String securityRealm;
 
-//    @Autowired
-//    private UserDetailsService userDetailsService;
+    @Autowired
+    public DataSource dataSource;
 
-//    @Override
-//    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-//        auth.userDetailsService(userDetailsService).
-//                passwordEncoder(new ShaPasswordEncoder(encodingStrength));
-//    }
+    // 반드시 autowired 를 해줘야 다른 클래스에서 참조가 가능하다.
+    // autowired 를 하지 않을 경우 SecurityConfiguration 에서는 정상적으로 생성했을지 몰라도
+    // 해당 authenticationManager 를 사용하는 다른 클래스는 inmemory 방식으로 실행되어 사용자 정보를 조회하지 못한다.
 
+    @Autowired
+    @Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+        auth
+                .jdbcAuthentication()
+                .dataSource(dataSource);
+        // users, authorities 테이블 생성을 위해 1회에 한하여 withDefaultSchema() 를 선언한다.
+    }
 
     @Override
     public void configure(WebSecurity web) throws Exception {
@@ -44,17 +53,9 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http.cors().and()
-                .authorizeRequests()
+        http.authorizeRequests()
                 .antMatchers("/h2-console/**").permitAll()
-                .antMatchers(HttpMethod.OPTIONS, "**").permitAll()
                 .and()
-                //                .csrf()
-//                .ignoringAntMatchers("/h2-console/**")
-//                .disable()
-//                .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
-//                .and()
-//                .disable()
                 .headers()
                     .frameOptions()
                     .disable()
@@ -65,20 +66,21 @@ public class SecurityConfiguration extends WebSecurityConfigurerAdapter {
                 .csrf().disable();
     }
 
-    @Bean
-    public FilterRegistrationBean corsFilterRegistrationBean() {
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        CorsConfiguration config = new CorsConfiguration();
-        config.applyPermitDefaultValues();
-        config.setAllowCredentials(true);
-        config.setAllowedOrigins(Arrays.asList("*"));
-        config.setAllowedHeaders(Arrays.asList("*"));
-        config.setAllowedMethods(Arrays.asList("*"));
-        config.setExposedHeaders(Arrays.asList("content-length"));
-        config.setMaxAge(3600L);
-        source.registerCorsConfiguration("/**", config);
-        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
-        bean.setOrder(0);
-        return bean;
-    }
+//    @Bean
+//    public FilterRegistrationBean corsFilterRegistrationBean() {
+//        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+//        CorsConfiguration config = new CorsConfiguration();
+//        config.applyPermitDefaultValues();
+//        config.setAllowCredentials(true);
+//        config.setAllowedOrigins(Arrays.asList("*"));
+//        config.setAllowedHeaders(Arrays.asList("*"));
+//        config.setAllowedMethods(Arrays.asList("*"));
+//        config.setExposedHeaders(Arrays.asList("content-length"));
+//        config.setMaxAge(3600L);
+//        source.registerCorsConfiguration("/**", config);
+//        FilterRegistrationBean bean = new FilterRegistrationBean(new CorsFilter(source));
+//        bean.setOrder(0);
+//        return bean;
+//    }
+
 }
